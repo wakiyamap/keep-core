@@ -4,7 +4,7 @@
 [[projects]]
   name = "github.com/dfinity/go-dfinity-crypto"
   packages = ["bls","rand"]
-  revision = "1db358303499a9879dd640c71f831897e06e9ddf"
+  revision = "4480e551cb2b5b43a7bdeaababf5db6e6d6aad86"
   source = "https://github.com/keep-network/go-dfinity-crypto.git"
 
 [[projects]]
