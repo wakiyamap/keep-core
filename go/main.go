@@ -12,6 +12,9 @@ import (
 )
 
 func main() {
+
+	thresholdgroup.Sign("loltest!")
+
 	bls.Init(bls.CurveFp382_1)
 
 	beaconConfig := chain.GetBeaconConfig()
