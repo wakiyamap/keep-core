@@ -46,6 +46,7 @@ func newAuthenticatedInboundConnection(
 		localPeerPrivateKey: privateKey,
 	}
 
+	fmt.Println("we have a new outbound conn")
 	if err := ac.runHandshakeAsResponder(); err != nil {
 		// close the conn before returning (if it hasn't already)
 		// otherwise we leak.
@@ -75,6 +76,7 @@ func newAuthenticatedOutboundConnection(
 		)
 	}
 
+	fmt.Printf("we have a new outbound conn %+v\n", remotePeerID)
 	ac := &authenticatedConnection{
 		Conn:                unauthenticatedConn,
 		localPeerID:         localPeerID,
@@ -126,6 +128,7 @@ func (ac *authenticatedConnection) runHandshakeAsInitiator() error {
 		return err
 	}
 
+	fmt.Printf("act 2 %+v\n", initiatorAct2)
 	initiatorAct3, err := initiatorAct2.Next(act2Message)
 	if err != nil {
 		return err
@@ -144,6 +147,7 @@ func (ac *authenticatedConnection) runHandshakeAsInitiator() error {
 		return err
 	}
 
+	fmt.Printf("act 3 completed as initiator %+v\n", initiatorAct3)
 	return nil
 }
 

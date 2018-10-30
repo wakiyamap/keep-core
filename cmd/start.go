@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"crypto/rand"
 	"fmt"
 
 	"github.com/keep-network/keep-core/config"
@@ -9,6 +10,7 @@ import (
 	"github.com/keep-network/keep-core/pkg/chain/ethereum"
 	"github.com/keep-network/keep-core/pkg/net/key"
 	"github.com/keep-network/keep-core/pkg/net/libp2p"
+	libp2pcrypto "github.com/libp2p/go-libp2p-crypto"
 	"github.com/urfave/cli"
 )
 
@@ -52,9 +54,25 @@ func Start(c *cli.Context) error {
 		config.LibP2P.Port = c.Int(portFlag)
 	}
 
-	staticKey, err := loadStaticKey(config.Ethereum.Account)
-	if err != nil {
-		return fmt.Errorf("error loading static peer's key [%v]", err)
+	isBootstrapNode := config.LibP2P.Seed != 0
+
+	var (
+		staticKey *key.StaticNetworkKey
+	)
+	if isBootstrapNode {
+		staticKey, err = loadStaticKey(config.Ethereum.Account)
+		if err != nil {
+			return fmt.Errorf("error loading static peer's key [%v]", err)
+		}
+	} else {
+		r := rand.Reader
+
+		privKey, _, err := libp2pcrypto.GenerateSecp256k1Key(r)
+		if err != nil {
+			return err
+
+		}
+		staticKey = privKey.(*key.StaticNetworkKey)
 	}
 
 	ctx := context.Background()
@@ -63,7 +81,6 @@ func Start(c *cli.Context) error {
 		return err
 	}
 
-	isBootstrapNode := config.LibP2P.Seed != 0
 	nodeHeader(isBootstrapNode, netProvider.AddrStrings(), port)
 
 	chainProvider, err := ethereum.Connect(config.Ethereum)
@@ -86,6 +103,7 @@ func Start(c *cli.Context) error {
 		return fmt.Errorf("error initializing beacon: [%v]", err)
 	}
 
+	fmt.Println("Beacon initialized")
 	select {
 	case <-ctx.Done():
 		if err != nil {

@@ -382,6 +382,13 @@
   version = "v2.2.2"
 
 [[projects]]
+  digest = "1:7fe51cd048085303a713c938daffa8dfe2d1375bc6f0fece1c3309b722bf3880"
+  name = "github.com/libp2p/go-libp2p-connmgr"
+  packages = ["."]
+  pruneopts = ""
+  revision = "9af270cbe3059a15af44e7f67b75d521e1fbd5e4"
+
+[[projects]]
   digest = "1:27e707daf9bbe915784b4a07f8b88f03dfa17efa8f010330181298483d56e005"
   name = "github.com/libp2p/go-libp2p-crypto"
   packages = [
@@ -400,12 +407,11 @@
   revision = "a6fadcfa851dde7fc3f0a2efd150a80790b01d79"
 
 [[projects]]
-  branch = "master"
-  digest = "1:5d8293a07a2f100b206d8c4116314969954d5f2d7d84732b313dc7ea033ccbfd"
+  digest = "1:6f1a7dfeb24cd4ce352cc36953dd7e1e41e7906971b4e961347f837dc049825a"
   name = "github.com/libp2p/go-libp2p-interface-connmgr"
   packages = ["."]
   pruneopts = ""
-  revision = "d00fbee4d35c7b5fdbd12499f673a236c6303865"
+  revision = "61a030e46d8f6c82500b0992360d7a5c701d367a"
 
 [[projects]]
   digest = "1:1cbd9ad2560fce2a2f66edf4cf52762821d1d7c65c4a13fe32100df87fe6dd39"
@@ -1000,6 +1006,7 @@
     "github.com/ethereum/go-ethereum/ethclient",
     "github.com/ethereum/go-ethereum/event",
     "github.com/ethereum/go-ethereum/rpc",
+    "github.com/gogo/protobuf/io",
     "github.com/gogo/protobuf/proto",
     "github.com/gogo/protobuf/protoc-gen-gogoslick",
     "github.com/gogo/protobuf/sortkeys",
@@ -1009,6 +1016,7 @@
     "github.com/libp2p/go-addr-util",
     "github.com/libp2p/go-conn-security",
     "github.com/libp2p/go-libp2p",
+    "github.com/libp2p/go-libp2p-connmgr",
     "github.com/libp2p/go-libp2p-crypto",
     "github.com/libp2p/go-libp2p-host",
     "github.com/libp2p/go-libp2p-kad-dht",

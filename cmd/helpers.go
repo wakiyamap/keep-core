@@ -36,6 +36,7 @@ func nodeHeader(isBootstrapNode bool, addrStrings []string, port int) {
 		buildMultiLine(maxLineLength, prefix, suffix, "IPs : ", addrStrings),
 		dashes,
 	)
+	return
 }
 
 func buildLine(lineLength int, prefix, suffix string, internalContent string) string {
