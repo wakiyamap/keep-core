@@ -372,6 +372,13 @@
   revision = "2787133b0469926b58dd819707cc4297a3ca7306"
 
 [[projects]]
+  digest = "1:76f74e1339f84a5769f71e1e801a41b3080d8dc99eb97da1af7cee27b4df0396"
+  name = "github.com/libp2p/go-libp2p-blankhost"
+  packages = ["."]
+  pruneopts = ""
+  revision = "ddfab12cf95a39c6af95f0cbc53108c08a1377ce"
+
+[[projects]]
   digest = "1:e11de47cbcc811694af4db90ce64838a0d404f63050266591869971367b6dff9"
   name = "github.com/libp2p/go-libp2p-circuit"
   packages = [
@@ -1008,17 +1015,25 @@
     "github.com/libp2p/go-addr-util",
     "github.com/libp2p/go-conn-security",
     "github.com/libp2p/go-libp2p",
+    "github.com/libp2p/go-libp2p-blankhost",
     "github.com/libp2p/go-libp2p-connmgr",
     "github.com/libp2p/go-libp2p-crypto",
     "github.com/libp2p/go-libp2p-host",
     "github.com/libp2p/go-libp2p-kad-dht",
+    "github.com/libp2p/go-libp2p-metrics",
     "github.com/libp2p/go-libp2p-peer",
     "github.com/libp2p/go-libp2p-peerstore",
+    "github.com/libp2p/go-libp2p-peerstore/pstoremem",
     "github.com/libp2p/go-libp2p-pubsub",
+    "github.com/libp2p/go-libp2p-swarm",
+    "github.com/libp2p/go-libp2p-transport-upgrader",
     "github.com/libp2p/go-libp2p/p2p/host/routed",
+    "github.com/libp2p/go-tcp-transport",
     "github.com/multiformats/go-multiaddr",
     "github.com/pborman/uuid",
     "github.com/urfave/cli",
+    "github.com/whyrusleeping/go-smux-multistream",
+    "github.com/whyrusleeping/go-smux-yamux",
     "golang.org/x/crypto/sha3",
     "golang.org/x/crypto/ssh/terminal",
     "golang.org/x/tools/imports",

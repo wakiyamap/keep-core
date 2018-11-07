@@ -278,6 +278,11 @@ func (c *channel) handleMessages(ctx context.Context) {
 				continue
 			}
 
+			// ignore messages from ourselves
+			if msg.GetFrom() == c.clientIdentity.id {
+				continue
+			}
+
 			if err := c.processPubsubMessage(msg); err != nil {
 				// TODO: handle error - different error types
 				// result in different outcomes. Print err is very noisy.
@@ -294,6 +299,7 @@ func (c *channel) processPubsubMessage(pubsubMessage *pubsub.Message) error {
 		return err
 	}
 
+	fmt.Println("attempting to verify message")
 	if err := c.verify(
 		pubsubMessage.GetFrom(),
 		envelope.GetMessage(),
@@ -301,6 +307,7 @@ func (c *channel) processPubsubMessage(pubsubMessage *pubsub.Message) error {
 	); err != nil {
 		return err
 	}
+	fmt.Println("successfully verified message")
 
 	var protoMessage pb.NetworkMessage
 	if err := proto.Unmarshal(envelope.Message, &protoMessage); err != nil {
@@ -362,6 +369,7 @@ func (c *channel) processContainerMessage(
 			)
 		}
 	}
+	fmt.Printf("message %+v from %+v, read by %+v\n", unmarshaled, proposedSender, c.clientIdentity.id)
 
 	// Fire a message back to the protocol.
 	protocolMessage := internal.BasicMessage(

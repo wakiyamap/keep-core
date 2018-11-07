@@ -23,6 +23,16 @@ type transport struct {
 	privateKey  libp2pcrypto.PrivKey
 }
 
+// LocalPeer returns the transports local peer ID.
+func (t *transport) LocalPeer() peer.ID {
+	return t.localPeerID
+}
+
+// LocalPrivateKey returns nil. This transport is not secure.
+func (t *transport) LocalPrivateKey() libp2pcrypto.PrivKey {
+	return t.LocalPrivateKey()
+}
+
 func newAuthenticatedTransport(pk libp2pcrypto.PrivKey) (*transport, error) {
 	id, err := peer.IDFromPrivateKey(pk)
 	if err != nil {
