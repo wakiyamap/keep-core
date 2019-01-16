@@ -200,8 +200,14 @@ func Connect(groupSize int, threshold int) chain.Handle {
 
 	return &localChain{
 		relayConfig: &relayconfig.Chain{
-			GroupSize: groupSize,
-			Threshold: threshold,
+			GroupSize:                       groupSize,
+			Threshold:                       threshold,
+			TicketInitialSubmissionTimeout:  5,
+			TicketReactiveSubmissionTimeout: 5,
+			TicketChallengeTimeout:          5,
+			MinimumStake:                    big.NewInt(1),
+			TokenSupply:                     big.NewInt(100),
+			NaturalThreshold:                big.NewInt(10000),
 		},
 		groupRegistrationsMutex:      sync.Mutex{},
 		groupRelayEntries:            make(map[string]*big.Int),
