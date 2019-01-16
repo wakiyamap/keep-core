@@ -140,6 +140,9 @@ func (kg *keepGroup) GroupSize() (int, error) {
 	return int(groupSize.Int64()), nil
 }
 
+// TicketInitialSubmissionTimeout represents the amount of time (in blocks) the
+// clients have to submit their their tickets (falling under natural threshold).
+// Corresponds to the Group Selection Phase 2a.
 func (kg *keepGroup) TicketInitialSubmissionTimeout() (int, error) {
 	ticketInitialSubmissionTimeout, err :=
 		kg.caller.TicketInitialSubmissionTimeout(kg.callerOpts)
@@ -149,6 +152,9 @@ func (kg *keepGroup) TicketInitialSubmissionTimeout() (int, error) {
 	return int(ticketInitialSubmissionTimeout.Int64()), nil
 }
 
+// TicketReactiveSubmissionTimeout represents the amount of time (in blocks) the
+// clients have to submit their tickets not submitted during the initial
+// submission period. Corresponds to the Group Selection Phase 2b.
 func (kg *keepGroup) TicketReactiveSubmissionTimeout() (int, error) {
 	ticketReactiveSubmissionTimeout, err :=
 		kg.caller.TicketReactiveSubmissionTimeout(kg.callerOpts)
@@ -158,6 +164,9 @@ func (kg *keepGroup) TicketReactiveSubmissionTimeout() (int, error) {
 	return int(ticketReactiveSubmissionTimeout.Int64()), nil
 }
 
+// TicketChallengeTimeout represents the amount of time (in blocks) the
+// clients have to submit any challenges against tickets they see on-chain.
+// Corresponds to the Group Selection Phase 3.
 func (kg *keepGroup) TicketChallengeTimeout() (int, error) {
 	ticketChallengeTimeout, err := kg.caller.TicketChallengeTimeout(kg.callerOpts)
 	if err != nil {
@@ -166,14 +175,20 @@ func (kg *keepGroup) TicketChallengeTimeout() (int, error) {
 	return int(ticketChallengeTimeout.Int64()), nil
 }
 
+// MinimumStake is the amount of stake that corresponds to a single ticket for
+// group selection.
 func (kg *keepGroup) MinimumStake() (*big.Int, error) {
 	return kg.caller.MinimumStake(kg.callerOpts)
 }
 
+// TokenSupply represents the total number of tokens in the system.
+// This value is fixed.
 func (kg *keepGroup) TokenSupply() (*big.Int, error) {
 	return kg.caller.TokenSupply(kg.callerOpts)
 }
 
+// NaturalThreshold represents the distribution of tickets for fair ticket
+// selection in the group selection algorithm.
 func (kg *keepGroup) NaturalThreshold() (*big.Int, error) {
 	return kg.caller.NaturalThreshold(kg.callerOpts)
 }
