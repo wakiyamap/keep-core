@@ -38,6 +38,7 @@ Initial suggestion: 10,000 KEEP or 1/100,000 of the total supply
 |$1,000M |$10,000
 |$10,000M |$100,000
 |===
+
 == Authorizations
 
 Can't revoke authorizations:
@@ -255,7 +256,87 @@ is determined by _minimum stake * (100 weeks / unstaking period)_
 |25 weeks |$400   |$4k   |$40k
 |===
 
+=== Grant contract as owner of stake?
+
+If one can add tokens to an existing staker,
+the grant contract could act as owner of all locked stakes
+and recipients could ask the grant contract to increase their stakes
+by the appropriate stake-ahead amount.
+
+This would require no other modifications to the staking contract
+apart from the ability to stake more under the same agreement.
+This change would not have a significant impact on incentive structures;
+it would enable "rescuing" stakers that have fallen below the minimum
+and "topping up" stakers with an inefficient stake
+that isn't marginally above a multiple of the minimum.
+
+Grantees can issue instructions to grant contract
+which then acts as the owner and directly manages the staking contract.
+
+Stake-ahead for tokens that would be unlocked within the unstaking period
+
+=== Limited/unlimited stake-ahead?
+
+Limit stake-ahead to the unstaking period for revocable grants,
+allow unlimited stake-ahead but limited withdrawals for non-revocable grants.
+
+- two parallel systems with parallel rules
+- biases early staking for the advantage of non-revocables
+- opens greater amount of 
+
 === Grant-compatible staking
+
+==== Active stake limiting in grant contract
+
+Unprotected stake::
+Tokens vested by unstaking time (stake-ahead),
+may be used for slashing
+
+Protected stake::
+Tokens still locked at the end of the unstaking period,
+may not be used for slashing
+
+Weight derived from full stake (unprotected+protected),
+but unprotected (slashable) stake limited.
+If unprotected stake falls below _minimum stake_,
+trigger unstaking due to insufficient stake.
+
+===== Integrity-critical contracts
+* staking
+* grants
+
+The grant contract becomes integrity-critical
+as it is queried for staker weights
+
+===== T-transfer invariants
+Not required
+
+===== Distortions
+Locked tokens have higher _weight : actual stake_ ratio than liquid tokens,
+increases risk of overstaking
+
+Short and long grants equal in weight
+
+===== Ugliness
+Privileged special case for grants
+
+==== Active stake limiting in staking contract
+
+Provides the locking status in the staking contract
+
+===== Integrity-critical contracts
+* staking
+
+===== T-transfer invariants
+Not required
+
+===== Distortions
+As in previous
+
+===== Ugliness
+Added complexity in staking contract to handle locked stake status
+
+Can be generalized into an instruction to 
 
 Instead of staking contract, split the responsibilities:
 
