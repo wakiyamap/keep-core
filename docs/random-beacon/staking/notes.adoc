@@ -2,6 +2,80 @@
 
 Notes and speculation
 
+== Indirect staking
+
+The system is divided to multiple parts:
+
+token contract::
+Handles the underlying ERC20 token;
+stores liquid token amounts under immediate control of the owner address,
+performs token transfers;
+frozen (immutable and replaced by a different contract only in a hard fork)
+
+staking contract::
+Handles the staking of tokens;
+stores tokens that are locked for collateral and tracks their owners,
+stores information about the stakers,
+performs operations on the stake;
+opt-in upgradeable
+(immutable but may be replaced by explicitly using a new contract address)
+
+grant contract::
+Handles token grants;
+stores tokens subject to grants,
+acts as owner of tokens for staking token grants
+
+functionality contracts::
+Handles the actual work performed
+
+=== Why
+
+With indirect staking,
+tokens are staked by transferring them to the _staking contract_
+and providing the necessary extra information
+(operator, magpie and authorizer addresses).
+The _staking contract_ creates an entry for the new staker,
+and populates it with the information from the staking transaction.
+
+Because the staked tokens are owned directly by the staking contract,
+locking, slashing, and unlocking the tokens
+involves only the staking contract.
+This separation of concerns
+helps keep the system simple and easy to reason about,
+which helps with securing the design.
+Additionally, upgrading the staking contract
+is as simple as deploying a new one
+and having each owner stake their tokens in the new contract.
+The token contract is completely unconcerned with staking contract upgrades.
+
+If staked tokens were held locked in the token contract itself,
+a lot of the functionality necessary for staking
+would need to be implemented in the token contract.
+The token contract would also need to be aware
+of possible upgrades to the staking contract.
+This would inevitably make the token contract more complex and harder to secure.
+Furthermore, implementing token grants with such non-indirected staking
+would require even more extra functionality in the token contract.
+
+specifically:
+* what happens to transactions to an address that is set as staking
+** no big deal, we can just use the latest amount
+* what happens to transactions from an address that is set as staking
+** you absolutely need to lock these, so we need to meddle with the token contract from the staking contract
+* also you need to be able to penalise the staker, ie. take tokens away from the owner
+** you need this, so your staking contract effectively has full root access to stakers' tokens
+* also, the staking contract is intended to be upgradeable later on afaik?
+** so you need the infrastructure for dealing with upgrades in the token contract, and that infrastructure has root access to everybody's tokens
+
+whereas with indirected staking:
+* you stake by moving tokens to the staking contract as part of the staking transaction
+** token contract can be extremely simple and thus easy to secure
+* staking contract only has unlimited power over the tokens explicitly sent to it
+** easy upgrades (just send tokens to a different staking contract instead)
+** safe and consensual upgrades (any compromise or vulnerability in the upgrade process can't touch anyone's tokens unless they specifically send them to the bad address)
+* elegant separation of concerns
+* much more flexible wrt adding tokens to stakes (whether blocked or permitted), staking partial amounts, testing out new features with less risk...
+
 == Minimum stake
 
 From the Ethereum rich list at etherscan.io:
