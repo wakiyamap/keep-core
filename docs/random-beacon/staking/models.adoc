@@ -11,13 +11,13 @@ and _locked stakes_ that are already backing some existing operation.
 When a (virtual) staker joins a new operation
 requiring some amount of tokens as collateral,
 the staker is required to _lock up_ some of their _free stake_.
-+
+
 This _locked stake_ is held as collateral
 to ensure any misbehavior in the operation can be properly penalized,
 and cannot be used for any other operation.
 When the operation finishes,
 all stake locked for that particular operation is released.
-+
+
 This ensures that all operations are always _fully backed_ by actual stake,
 and operations never interfere with each other's stakes.
 However, the network throughput is limited
@@ -31,7 +31,7 @@ without considering other operations.
 A staker is able to join more operations
 than they could pay the maximum penalty for,
 thus becoming _leveraged_.
-+
+
 If a _leveraged_ staker gets penalised on some of their operations,
 their token balance may fall below
 the amount they would be slashed for some subsequent misbehavior.
@@ -39,7 +39,7 @@ A staker whose penalty exceeds their remaining stake
 _defaults_ on the operation.
 The possibility of a default
 can significantly reduce the incentives for correct behavior.
-+
+
 On the upside,
 leveraged staking is simpler and cheaper to implement,
 it has no limits on the number of concurrent operations,
