@@ -195,7 +195,7 @@ divided by Mallory's leverage ratio.
 ==== Demand ratio and overleverage
 When analyzed in a vacuum,
 it appears as if any degree of leverage would render the network vulnerable.
-However, when comparing atomic and leveraged staking,
+However, when comparing fully backed and leveraged staking,
 it is necessary to consider the demand ratio as well.
 
 When the demand ratio (DR) is below 1,
@@ -204,9 +204,9 @@ With the average leverage ratio (ALR) equaling the demand ratio,
 all stakers whose stakes are leveraged are by definition overleveraged.
 
 When the DR exceeds 1,
-atomic staking necessitates reducing the minimum stake. 
-This changes the balance between atomic and leveraged staking,
-as atomic staking can only sustain a maximum penalty of
+fully backed staking necessitates reducing the minimum stake. 
+This changes the balance between fully backed and leveraged staking,
+as fully backed staking can only sustain a maximum penalty of
 _initial minimum stake / demand ratio_.
 Leveraged stake has no such constraint
 and the minimum stake and maximum penalty can stay constant.
@@ -214,7 +214,7 @@ and the minimum stake and maximum penalty can stay constant.
 The result of this asymmetry is that an absolutely leveraged staker
 whose leverage ratio equals the DR = ALR
 will still have the same _total deterrent_ over all their operations
-as they would under atomic staking,
+as they would under fully backed staking,
 while having a significantly greater _marginal deterrent_.
 This discrepancy is arguably desirable
 if opportunities to profitably misbehave are uncommon.
@@ -223,33 +223,37 @@ A different picture emerges when considering a staker
 who is _overleveraged_ compared to the average.
 In this case the marginal deterrent remains high,
 but the effective _per-operation deterrent_ is divided by the OR.
-Under atomic staking it is not possible to become overleveraged
+Under fully backed staking it is not possible to become overleveraged
 and per-operation deterrent remains constant.
 
 .Deterrent amounts
 |===
-|Type |Value under atomic staking |Value under leveraged staking
+|Type |Value under fully backed staking |Value under leveraged staking
 
 |Marginal deterrent
-|minimum stake
 |minimum stake / DR
+|minimum stake
 
 |Total deterrent
 |staked tokens
 |staked tokens
 
 |Per-operation deterrent
-|minimum stake / (DR * OR)
 |minimum stake / DR
+|minimum stake / (DR * OR)
 |===
 
-Thus the name _overleverage attack_.
+The name _overleverage attack_
+comes from how the per-operation deterrent
+is equal to the fully backed equivalent
+divided by the specific staker's overleverage ratio.
 
 ==== Blitzpantsing reduction
 The law of large numbers significantly reduces the likelihood
 of a staker having a large overleverage ratio
 as their total stake increases.
 This can be entirely circumvented with blitzpantsing.
+
 Because operations are joined on the granularity of virtual stakers,
 a large staker is practically guaranteed
 to have some of their virtual stakers _overleveraged_
@@ -259,14 +263,97 @@ removes the smoothing effect of the law of large numbers
 and lets the adversary pick the most favorable identities
 for the overleverage attack.
 
-Mallory has _m~total~_ virtual stakers.
-_m~avg~_ of these stakers have the same leverage ratio as the average;
-_m~over~_ are overleveraged,
-and _m~under~_ are underleveraged compared to the average.
+Consider Mallory who has _m~total~_ virtual stakers,
+participating in _ops~total~_ operations.
+These virtual stakers can be divided into the following groups:
+
+* the virtual stakers with the same leverage ratio as the average: _vs~avg~_
+(or leverage ratio of 1 if the average is lower)
+* overleveraged virtual stakers: _vs~over~_ 
+* virtual stakers that participate in some operations,
+but are underleveraged compared to the average: _vs~under~_
+* virtual stakers who do not participate in any operations: _vs~none~_
+
+Let the number of virtual stakers in each category be
+_m~avg~, m~over~, m~under~_ or _m~none~_ respectively,
+and the total operations participated in
+by virtual stakers in each category be
+_ops~avg~, ops~over~_ and _ops~under~_.
+
+If _m~over~ > 0_, a blitzpantsed Mallory could perform an overleverage attack
+with _some_ virtual stakers _vs~over~_
+even if Mallory is overall _underleveraged_ compared to the average.
+The virtual stakers who aren't participating in any operations
+are particularly noteworthy;
+stake held by _vs~none~_ can be entirely protected from slashing
+via blitzpantsing.
+
+The only scenario where blitzpantsing does not strengthen overleverage attacks
+compared to a monolithic stake
+is when all virtual stakers are equally leveraged. 
+In such a case there is still no disadvantage to blitzpantsing
+beyond the (marginal) transaction costs
+of setting up a large number of separate stakers.
+
+Due to the blitzpantsing reduction,
+the real deterrents are:
+
+.Deterrent amounts
+|===
+|Type |Value with blitzpantsing
+
+|Marginal deterrent
+|minimum stake
+
+|Total deterrent
+|staked tokens * (1 - m~none~/m~total~) = minimum stake * (m~total~ - m~none~)
+
+|Per-operation deterrent (attacking indiscriminately)
+|minimum stake * (1 - m~none~/m~total~) / (DR * OR) =
+minimum stake * (m~total~ - m~none~) / ops~total~
+
+|Per-operation deterrent (overleveraged virtual stakers only)
+|minimum stake * m~over~ / ops~over~
+|===
+
+==== Modeling
+The number of operations some virtual staker participates in
+is given by the binomial distribution _B(n, P)_
+where _n_ is the number of concurrent operations in the network
+and _P_ is the probability of a virtual staker being selected
+for any particular operation,
+equaling _group size / number of active virtual stakers_.
+Thanks to the blitzpantsing reduction,
+large stakers can be simply modeled as perfectly colluding virtual stakers
+instead of the hypergeometric distribution
+they would form in a monolithic model.
+
+The model can be further simplified
+by approximating the above binomial distribution
+with a poisson distribution _Pois(nP)_.
+The value
+_nP = concurrent operations * group size / number of active virtual stakers_
+equals the average leverage ratio
+_maximum penalty * concurrent operations * group size / total stake_
+when _maximum penalty = minimum stake_
+and all stakers are active:
+_nP = concurrent operations * group size / (total stake / minimum stake) = ALR_.
+
+This approximation _Pois(ALR)_ is applicable
+regardless of the exact group size,
+number of concurrent operations,
+or number of virtual stakers,
+as long as the group size is very small
+compared to the total number of virtual stakers.
+A common rule of thumb requires that _n > 100_ and _np < 10_;
+example values of _group size = 100_ and
+_minimum stake / total tokens = 1 / 100,000_
+give _p = 1 / 1,000_,
+satisfying this requirement when _0.1 < ALR < 10_.
 
 With an _ALR = LR~mallory~ = 1_, we get the following numbers:
 
-m~under~ = P(0, 1) * m~total~ = 0.37 * m~total~
+m~none~ = P(0, 1) * m~total~ = 0.37 * m~total~
 
 m~avg~ = P(1, 1) * m~total~ = 0.37 * m~total~
 
@@ -278,29 +365,6 @@ If Mallory only leaves out the virtual stakers whose stake sits unused,
 the effective overleverage ratio of the other virtual stakers
 is _1 / 0.63 = 1.59_.
 
-This means that any large staker,
-even if they are _underleveraged_ compared to the average,
-is probably able to perform an overleverage attack with blitzpantsing.
-Furthermore, any overleverage attack can be strengthened by blitzpantsing
-and leaving out the stakes of those virtual stakers
-who haven't been selected for any operations.
-With a monolithic stake those stakes would be diluting the overleverage
-without contributing any misbehavior opportunities.
-In the case where each virtual staker
-participates in exactly the same number of operations,
-the attack will not be weakened.
-
-The blitzpantsing reduction makes overleverage attacks
-significantly simpler to analyze.
-Instead of calculating complicated probability distributions for large stakers,
-it is sufficient to calculate the distribution
-of overleverage ratios for minimum stakers,
-given some average leverage ratio.
-The attack produced by picking and choosing
-blitzpantsed staker identities with favorable overleverage ratios
-will always be as strong or stronger than
-what would be possible with monolithic staking.
-
 ==== Overleverage attack mitigation
 As the ALR increases, the viability of overleverage attacks decreases.
 An OR of 2 is much easier to achieve with an ALR of 1,
@@ -310,7 +374,7 @@ In the latter case only 0.35% of minimum stakers would have an OR of 2 or more,
 compared to the 26% of the first scenario.
 
 |===
-|ALR |Minimum LR for OL >= 2 |Probability (poisson)
+|ALR |Minimum LR for OR >= 2 |Probability
 
 |1 |2 |0.26
 |2 |4 |0.14
@@ -324,7 +388,7 @@ A lower ALR also provides protection from overleverage attacks,
 as the fraction of used stake held by overleveraged virtual stakers decreases:
 
 |===
-|ALR |P(1, ALR) |P~over~(1, ALR) |Overleveraged fraction |Average overleverage
+|ALR |P(1, ALR) |P~over~(1, ALR) |Overleveraged stake |Average overleverage
 
 |0.5 |0.30 |0.090 |0.4 |2.22
 |0.4 |0.27 |0.062 |0.33 |2.10
@@ -335,186 +399,10 @@ as the fraction of used stake held by overleveraged virtual stakers decreases:
 While maintaining a low ALR is not viable for a successful system,
 it is possible to get the benefits of a high ALR with a lower DR
 by requiring a higher minimum stake.
-If the minimum stake is higher than the maximum penalty,
-fewer virtual stakers will become overleveraged
-and those that do will have a lower OR.
-
-
-
-
-
-
-
-
-== [old notes]
-
-== Atomic staking
-
-With atomic staking, each operation is backed by hard tokens.
-When Alice joins an operation requiring 5 tokens in stake,
-she will need to lock up those 5 tokens until that operation is finished.
-
-Atomicity guarantees that all stakers
-will always have the specified amount of tokens at stake for each operation.
-This has the attractive property
-of preventing situations where somebody could misbehave "for free"
-by having no stake to be slashed.
-
-However, a serious downside of atomicity is
-that the throughput of the network has a hard limit at
-_concurrent operations =< total tokens staked / stake per operation_.
-To deal with this, the _stake per operation_ needs to be reduced
-as network demand increases.
-This creates a symmetrical constraint in
-_stake per operation =< total tokens staked / concurrent operations_.
-
-Let Alice's _used stake_ be the sum of the stakes required
-for each operation Alice is participating in.
-The _usage ratio_ is the ratio of _used stake / stake_.
-Atomic staking by definition has a usage ratio between 0 and 1.
-Let _average usage ratio = total used stake / total tokens staked_.
-
-Let the _demand ratio_ be
-_concurrent operations * initial minimum stake / total tokens staked_.
-When the _demand ratio_ exceeds 1,
-the minimum stake must be reduced to allow further network operations.
-If _demand ratio = 4_,
-and _current minimum stake = initial minimum stake / 8_,
-the _average usage ratio_ would be 0.5.
-
-== Leveraged stakes
-
-Without atomic staking, a staker can end up _leveraged_:
-i.e. Alice may be participating in so many operations
-that her total stakes would be insufficient
-to cover the maximum penalty for all of them.
-This can theoretically result in a situation
-where Alice's stake is slashed in its entirety
-by a small number of misbehaviors,
-leaving no effective deterrent to further misbehavior.
-
-=== Leverage ratio
-
-
-
-
-== Improving atomic staking
-
-Atomic staking has two main weaknesses:
-complexity of implementation and increased state in the system,
-and the throughput constraints.
-While the first is unavoidable,
-the throughput of atomic staking must be able to scale
-for the system to be successful.
-This necessitates lowering the stake requirements as demand increases.
-
-== Analysis
-
-When comparing atomic and leveraged staking,
-a crucial consideration is whether one or the other
-provides a more effective deterrent to misbehavior
-under different scenarios.
-
-We have three categories of scenarios to consider:
-
-1. when the _demand ratio_ is below 1;
-in _atomic staking_ most stakers' _usage ratio_ is below 1,
-while in _leveraged staking_ most stakers' _leverage ratio < 1_
-
-2. when the _demand ratio_ is exactly 1;
-in _atomic staking_ all stakers are at _usage ratio = 1_,
-while in _leveraged staking_ the _average leverage ratio = 1_
-but some stakers remain _underleveraged_ and others can be _overleveraged_
-
-3.  when the _demand ratio_ exceeds 1;
-in _atomic staking_ the minimum stake has been reduced to permit throughput,
-while in _leveraged staking_ most stakers are leveraged,
-with randomly varying overleverage ratios
-
-Where numbers are required,
-we can use the sample distribution based on empirical power law observations.
-Simplify the calculations by dividing all token amounts
-by the initial minimum stake of 10,000;
-thus the initial minimum stake _MinStake = 1_,
-and the total token supply is _100,000_.
-
-Assume a group size _N_ of 100,
-that all stakers are active at all times,
-and all stakes are optimally staked
-(everybody stakes an exact integer multiple of the minimum).
-
-Let _P(n, s)_ be the probability of a staker with _s_ staked tokens
-participating in _n_ operations.
-
-_P~over~(n, s) = sum[i = n+1..inf]( P(i, s) )_;
-the probability of more than _n_ operations with _s_ stake
-
-_P~under~(n, s) = sum[j = 0..n-1]( P(j, s) )_
-the probability of less than _n_ operations with _s_ stake
-
-Let _P~selected~(k, s)_ be the probability of a staker with _s_ tokens
-being selected for a group _k_ times.
-
-Let _Hgeo(k, N, K, n)_ be the hypergeometric probability function
-of drawing _k_ specimens out of _n_ samples,
-when the population is _N_ containing _K_ specimens.
-
-Let _Bin(k, n, P)_ be the binomial probability function
-of getting _k_ independent successes on _n_ tries,
-when the probability of success is _P = K / N_.
-
-=== Scenario 1: DR < 1
-
-=== Scenario 2: DR = 1
-
-For simplicity, assume atomic staking is at full capacity
-as the minimum stake has not been reduced.
-
-With atomic staking, the math remains simple:
-
-* marginal deterrent = minimum stake = 10,000 KEEP
-* total deterrent = minimum stake * active operations
-* per-operation deterrent = minimum stake
-
-With leveraged staking, the situation becomes more complex:
-
-A minimum staker has _P(1, 1)_ of being exactly even;
-a _P(0, 1)_ of not participating in any operation;
-_P~over~(1, 1)_ of being (over)leveraged.
-
-With actual numbers:
-
-There are 100,000 tokens staked.
-With _N = 100_ we get 1,000 groups active at any time.
-
-_P~selected~(k, s) = Hgeo(k, 100000, s, 100)_
-
-_P(0, s) = Bin(0, 1000, ( 1 - P~selected~(0, s) ))_
-
-_P(0, 1) = Bin(0, 1000, P~selected~(1, 1))_
-
-_P(0, 1) = Bin(0, 1000, Hgeo(1, 100000, 1, 100))_
-or 0.368
-
-_P(1, 1) = 0.368_
-_P(2, 1) = 0.184_
-_P(3, 1) = 0.061_
-_P(4, 1) = 0.015_
-_P(5, 1) = 0.003_
-_P~over~(5, 1) = 0.0005_
-
-_P(10, 10) = 0.126_
-_P~under~(10, 10) = 0.457_
-_P~over~(10, 10) = 0.417_
-_P~over~(20, 10) = 0.0015_
-
-P(3, 2) = 0.180
-P(4, 2) = 0.090
-P(5, 2) = 0.036
-P(6, 2) = 0.012
-P(7, 2) = 0.0034
-P(8, 2) = 0.00086
-P(9, 2) = 0.00019
-P~over~(9, 2) = 0.00005
-
-=== Scenario 3: DR > 1
+If the minimum stake is some multiple _X_ of the maximum penalty,
+the relationship of _nP_ and _ALR_ becomes _ALR = nP / X_.
+When _ALR >= 1_, this gives an effective average leverage ratio
+of _ALR * X_ for the probability distribution of overleverage ratios.
+When _ALR < 1_, the overleverage ratio becomes effectively _UR / X_.
+Even a small multiplier of _X = 3 ~ 5_
+has a dramatic effect in reducing overleverage attack risk.
