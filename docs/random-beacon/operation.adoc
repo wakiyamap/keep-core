@@ -1,0 +1,248 @@
+= Operations and work contracts
+
+Operation::
+An _operation_ means some set of network actions
+performed by some specified _participants_,
+stakers who volunteer some of their staked tokens as collateral
+for incentivizing correct behavior,
+with the goal of completing some useful work in the network
+as defined in _work contracts_.
+
+Actions::
+Individual building blocks of _operations_,
+such as local calculation,
+communication with other participants,
+or publishing transactions on-chain.
+
+Work contract::
+Work contracts define _operations_
+and the rules for rewarding or punishing participants
+for the actions taken by them.
+
+== The lifespan of an operation
+Operations are created in response to specific transactions,
+and remain active until they are finished.
+Operations are much larger and longer-lived
+than individual _actions_ that may be performed as part of the operation;
+in the random beacon the lifespan of a group from creation to expiration
+would be a single operation.
+
+=== Beginning and adding participants
+Each operation begins by selecting the _participants_
+(also called _members_)
+with random sortition from eligible _virtual stakers_.
+A staker must actively opt in to participate in an operation.
+Participants may be required to _bond_ some currency
+in addition to their normal stakes.
+
+Stakers with multiple virtual stakers (_staker weight_ above 1)
+may be selected multiple times for the same operation.
+Each virtual staker must use a unique identifier
+to distinguish itself at all times.
+
+It may sometimes be appropriate
+for an operation to add more participants after its creation.
+In such cases care should be taken
+to select the new participants in a way that cannot be manipulated
+to gain an advantage or attack the network.
+
+=== Performing work for customers
+The purpose of any operation is to perform _work_
+in response to _requests_ by _customers_;
+third parties who pay a _fee_ for the requested work.
+
+Well-behaved participants that contribute to useful work
+should be _rewarded_ with some of the _fees_ paid by customers.
+There is no limit to how much rewards an operation can pay out.
+
+Participants who fail to perform the required work, or misbehave,
+may be _punished_.
+Punishments may take the form of
+_slashing_ some of the participant's staked tokens;
+_seizing_ some or all of the currency that has been _bonded_ for the operation;
+or _withholding_ rewards the participant would otherwise be entitled to.
+
+=== Finishing and removing participants
+An operation that has run its course will finish.
+A _finished_ operation cannot have any further impact on its participants;
+_rewards_ and _punishments_ must be given out before finishing,
+and _bonded_ currency is be returned when the operation ends.
+
+A participant may be _removed_ from an active operation
+without the operation _finishing_ as a whole.
+Typical reasons for such removal would be
+the participant misbehaving
+or the staker becoming _ineligible_ to continue participating.
+An example of the latter would be,
+depending on the staking model,
+the participant's stake falling below a required minimum
+due to being slashed for misbehavior in another operation,
+or being in the process of _unstaking_ or _undelegating_
+and having finished the required waiting period
+without the operation as a whole finishing within that time.
+
+When a participant is removed from an operation,
+it discharges their obligations towards the operation
+the same way as if the operation had finished.
+
+== Stakes, bonds, rewards and punishments
+
+=== Required stake
+Each operation specifies some amount of stake required for participation.
+This _required stake_ determines
+the maximum any participant may be _slashed_ for misbehavior.
+
+Slashed stakes are transferred to the work contract
+which may distribute them out at its discretion.
+However, it is recommended
+that slashed stakes be distributed as widely and evenly as practicable
+to avoid certain attacks where the attacker seeks to regain the slashed tokens,
+undermining the integrity of the incentive mechanisms.
+
+Depending on the staking model,
+the _required stake_ may be locked for the duration of the operation
+under the exclusive control of the _work contract_ like bonded currency;
+or the _work contract_ may simply be entitled
+to slash each participant's tokens at its discretion up to the defined amount.
+
+It is recommended that each _work contract_
+be designed so that it does not slash any participant
+more than the _required stake_ within a single operation under any conditions,
+even if that invariant is not enforced directly.
+An allowable exception would be to slash and sell some tokens
+to cover a minor penalty,
+while still reserving the right to slash the full amount
+if the participant were to engage in serious misbehavior later.
+In such a case the work contract should offer a "get out clause"
+involving a higher immediate penalty but removing the participant
+so the maximum stake at risk
+can only exceed the _required stake_ voluntarily.
+However, the impact of such "get out clauses" has not been explored yet
+and depending on staking models
+it may prove inadvisable to include such a mechanism
+instead of specifying a higher required stake
+if the operation cannot be finished at the first penalty.
+
+=== Bonded currency
+Some operations may require their participants
+to _bond_ currency in addition to the staked tokens.
+The bonded currency is locked and exclusively assigned to the operation
+until the operation finishes or the participant is removed from it.
+The _work contract_ is free to _seize_ this bonded currency
+at any time at its discretion.
+
+Depending on the staking model,
+staked tokens alone may not provide a sufficient collateral
+if a staker gets selected for multiple operations
+so that the total _required stake_ exceeds the staked tokens available.
+Bonding a different denomination can also protect the collateral
+against fluctuations in exchange rates.
+
+=== Rewards
+When a _customer_ requests some _work_ from the _work contract_,
+the request includes paying a specified _fee_ in a specified currency.
+The work contract is expected to use the fees to pay out rewards
+to the participants of the operation performing the work,
+and to reimburse any significant transaction fees.
+
+Rewards may be paid out immediately,
+or they may be assigned to the participants that earned them
+but held by the work contract until the operation finishes.
+
+Rewards held by the work contract
+can be _withheld_ to cover minor penalties
+and are particularly suitable for the purpose.
+Regardless of the staking model,
+it is likely that _slashing_ tokens for minor penalties
+would have undesirable and destabilizing downstream effects,
+especially on marginal stakers
+who may only have the global _minimum stake_ to their name.
+
+== Actions in an operation
+The rules of an operation are defined in the corresponding _work contract_.
+The work contract may designate various actions as
+_required_, _prohibited_, or _optional_.
+
+Actions may be _explicit_:
+specific well-defined actions such as publishing a transaction
+calling a specific function on the work contract with specific inputs;
+or _implicit_:
+actions that encompass anything that results in some specified outcome.
+
+_On-chain actions_ involve publishing transactions
+that call specific contract functions with some input.
+_Off-chain actions_ cover everything else,
+such as local calculation
+or communication with other participants.
+
+=== Required actions
+_Required actions_ should be performed by all capable participants.
+
+_Required actions_ must be defined in such a way that a client can perform them,
+and are thus almost always _explicit_;
+an exception would be e.g. an operation
+involving the application of human judgement to resolve a dispute.
+In this case
+a human deciding between various alternatives
+would be an _implicit_ action,
+followed by the _explicit_ action of making that decision available to others
+in some specific way.
+
+When a required action is performed,
+participants may be rewarded.
+Rewards can be given either to the specific participant/s
+who attributably performed the required action;
+to all participants in the operation;
+or some combination of the two.
+
+Operations should be able to cope with
+some participants not being able to perform all required actions,
+due to network issues, client downtime, etc.
+In some circumstances it may be appropriate
+to punish participants for failing to perform a required action.
+
+Publishing a new beacon entry
+is an example of a _required explicit on-chain action_ in the random beacon.
+Performing the threshold signature on the correct inputs
+to determine the new beacon entry
+would be a _required explicit off-chain action_.
+
+=== Prohibited actions
+All participants must refrain from _prohibited actions_.
+Prohibited actions are also called _misbehavior_.
+
+Prohibited actions may be _explicit_
+(such as calling an on-chain function with invalid input,
+or sending an invalid message to another participant)
+or _implicit_
+(such as permitting non-authorized parties to discover secret information).
+
+Any participant caught performing a prohibited action
+should be punished accordingly.
+In some circumstances it may be appropriate to punish participants
+even when attributable proof of misbehavior is not available;
+for example, when a threshold secret key has been abused
+and thus a majority of participants
+must have _implicitly_ leaked or misused their key shares.
+
+=== Optional actions
+Actions that would be desirable to be performed
+but cannot be required from any participant
+are _optional_.
+
+An example of optional actions would be
+some participant publishing on-chain proof
+that another participant has performed an unauthorized disclosure of secrets.
+Discovering this misbehavior in whatever manner
+would be an _optional implicit off-chain action_,
+with publishing the proof being an _optional explicit on-chain action_.
+This particular kind of action is noteworthy enough
+to be given the specific label _tattletale action_.
+
+A participant performing an optional action should always be rewarded
+if the action is verified to be valid
+(trying to perform an invalid optional action would be prohibited).
+Because optional actions by definition
+cannot be reliably budgeted for,
+it is expected that they would typically be _tattletale actions_
+whose reward would be taken from the punishment of the misbehaving participant.
