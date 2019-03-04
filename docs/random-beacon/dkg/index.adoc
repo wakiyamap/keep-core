@@ -22,7 +22,11 @@ is defined.
 
 ifndef::yellowpaper[toc::[]]
 
+== Terms
+
 :leveloffset: +1
+
+include::../global-parameters.adoc[]
 
 include::terms.adoc[]
 

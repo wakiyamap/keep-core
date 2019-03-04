@@ -1,5 +1,3 @@
-= Terms used in distributed key generation (DKG)
-
 == Time limits
 
 [horizontal]

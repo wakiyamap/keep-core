@@ -1,0 +1,24 @@
+== Global security parameters
+
+[horizontal]
+N::
+H + M = 2M + 1 = 4M~nofail~ + 1
++
+Number of participants in a group
+
+H::
+M + 1 = (N - 1)/2 + 1
++
+Minimum number of honest participants in a group
+
+M::
+H - 1 = (N - 1)/2
++
+Maximum number of malicious participants in a group beyond which security
+guarantees don't hold
+
+M~nofail~::
+M/2 = (N - 1)/4
++
+Maximum number of disqualified participants in a group beyond which DKG will
+abort to preserve security
