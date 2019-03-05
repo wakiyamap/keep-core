@@ -12,21 +12,26 @@ contract KeepGroupImplV1 is Ownable {
 
     using SafeMath for uint256;
 
-    event GroupSelected(bytes32 groupPubKey);
+    event OnGroupRegistered(bytes groupPubKey);
 
     struct DkgResult {
         bool success;
-        bytes32 groupPubKey;
+        bytes groupPubKey;
         bytes disqualified;
         bytes inactive;
     }
 
-    event DkgResultPublishedEvent(uint256 requestId);
-    
+    event DkgResultPublishedEvent(uint256 requestId, bytes groupPubKey);
+
+    // Legacy code moved from Random Beacon contract
+    // TODO: refactor according to the Phase 14
+    event SubmitGroupPublicKeyEvent(bytes groupPublicKey, uint256 requestID, uint256 activationBlockHeight);
+
     uint256 internal _groupThreshold;
     uint256 internal _groupSize;
     uint256 internal _minStake;
     address internal _stakingProxy;
+    address internal _randomBeacon;
 
     uint256 internal _timeoutInitial;
     uint256 internal _timeoutSubmission;
@@ -36,12 +41,12 @@ contract KeepGroupImplV1 is Ownable {
     uint256 internal _randomBeaconValue;
 
     uint256[] internal _tickets;
-    bytes32[] internal _submissions;
+    bytes[] internal _submissions;
 
     mapping (uint256 => DkgResult) internal _requestIdToDkgResult;
     mapping (uint256 => bool) internal _dkgResultPublished;
-    mapping (bytes32 => uint256) internal _submissionVotes;
-    mapping (address => mapping (bytes32 => bool)) internal _hasVoted;
+    mapping (bytes => uint256) internal _submissionVotes;
+    mapping (address => mapping (bytes => bool)) internal _hasVoted;
 
     struct Proof {
         address sender;
@@ -51,15 +56,17 @@ contract KeepGroupImplV1 is Ownable {
 
     mapping(uint256 => Proof) internal _proofs;
 
-    bytes32[] internal _groups;
-    mapping (bytes32 => address[]) internal _groupMembers;
+    bytes[] internal _groups;
+    mapping (bytes => address[]) internal _groupMembers;
 
     mapping (string => bool) internal _initialized;
 
     /**
      * @dev Triggers the selection process of a new candidate group.
      */
-    function runGroupSelection(uint256 randomBeaconValue) public onlyOwner {
+    function runGroupSelection(uint256 randomBeaconValue) public {
+        require(msg.sender == _randomBeacon);
+        cleanup();
         _submissionStart = block.number;
         _randomBeaconValue = randomBeaconValue;
     }
@@ -88,14 +95,6 @@ contract KeepGroupImplV1 is Ownable {
             revert("Ticket submission period is over.");
         }
 
-        if (block.number > _submissionStart + _timeoutInitial && _tickets.length >= _groupSize) {
-            revert("Initial submission period is over with enough tickets received.");
-        }
-
-        if (block.number < _submissionStart + _timeoutInitial && ticketValue > naturalThreshold()) {
-            revert("Ticket must be below natural threshold during initial submission period.");
-        }
-
         // Invalid tickets are rejected and their senders penalized.
         if (!cheapCheck(msg.sender, stakerValue, virtualStakerIndex)) {
             // TODO: replace with a secure authorization protocol (addressed in RFC 4).
@@ -115,6 +114,26 @@ contract KeepGroupImplV1 is Ownable {
     }
 
     /**
+     * @dev Gets selected tickets in ascending order.
+     */
+    function selectedTickets() public view returns (uint256[]) {
+
+        require(
+            block.number > _submissionStart + _timeoutChallenge,
+            "Ticket submission challenge period must be over."
+        );
+
+        uint256[] memory ordered = orderedTickets();
+        uint256[] memory selected = new uint256[](_groupSize);
+
+        for (uint i = 0; i < _groupSize; i++) {
+            selected[i] = ordered[i];
+        }
+
+        return selected;
+    }
+
+    /**
      * @dev Gets participants ordered by their lowest-valued ticket.
      */
     function orderedParticipants() public view returns (address[]) {
@@ -128,6 +147,27 @@ contract KeepGroupImplV1 is Ownable {
         }
 
         return participants;
+    }
+
+    /**
+     * @dev Gets selected participants in ascending order of their tickets.
+     */
+    function selectedParticipants() public view returns (address[]) {
+
+        require(
+            block.number > _submissionStart + _timeoutChallenge,
+            "Ticket submission challenge period must be over."
+        );
+
+        uint256[] memory ordered = orderedTickets();
+        address[] memory selected = new address[](_groupSize);
+
+        for (uint i = 0; i < _groupSize; i++) {
+            Proof memory proof = _proofs[ordered[i]];
+            selected[i] = proof.sender;
+        }
+
+        return selected;
     }
 
     /**
@@ -176,29 +216,6 @@ contract KeepGroupImplV1 is Ownable {
         return passedCheapCheck && ticketValue == expected;
     }
 
-    function challenge(
-        uint256 ticketValue
-    ) public {
-
-        Proof memory proof = _proofs[ticketValue];
-        require(proof.sender != 0, "Ticket must be published.");
-
-        // TODO: replace with a secure authorization protocol (addressed in RFC 4).
-        // TokenStaking stakingContract = TokenStaking(_stakingContract);
-        // if (costlyCheck(
-        //     proof.sender,
-        //     ticketValue,
-        //     proof.stakerValue,
-        //     proof.virtualStakerIndex
-        // )) {
-        //     // Slash challenger's stake balance.
-        //     stakingContract.authorizedTransferFrom(msg.sender, this, _minStake);
-        // } else {
-        //     // Slash invalid ticket sender stake balance and reward the challenger.
-        //     stakingContract.authorizedTransferFrom(proof.sender, msg.sender, _minStake);
-        // }
-    }
-
     /**
      * @dev Submits result of DKG protocol. It is on-chain part of phase 13 of the protocol.
      * @param requestId Relay request ID assosciated with DKG protocol execution.
@@ -214,14 +231,43 @@ contract KeepGroupImplV1 is Ownable {
     function submitDkgResult(
         uint256 requestId,
         bool success, 
-        bytes32 groupPubKey,
+        bytes groupPubKey,
         bytes disqualified,
         bytes inactive
     ) public {
+
+        require(
+            block.number > _submissionStart + _timeoutChallenge,
+            "Ticket submission challenge period must be over."
+        );
+
+        require(
+            _tickets.length >= _groupSize,
+            "There should be enough valid tickets submitted to form a group."
+        );
+
         _requestIdToDkgResult[requestId] = DkgResult(success, groupPubKey, disqualified, inactive);
         _dkgResultPublished[requestId] = true;
   
-        emit DkgResultPublishedEvent(requestId);
+        emit DkgResultPublishedEvent(requestId, groupPubKey);
+    }
+
+    // Legacy code moved from Random Beacon contract
+    // TODO: refactor according to the Phase 14
+    function submitGroupPublicKey(bytes groupPublicKey, uint256 requestID) public {
+
+        // TODO: Remove this section once dispute logic is implemented,
+        // implement conflict resolution logic described in Phase 14,
+        // make sure only valid members are stored.
+        _groups.push(groupPublicKey);
+        address[] memory members = orderedParticipants();
+        for (uint i = 0; i < _groupSize; i++) {
+            _groupMembers[groupPublicKey].push(members[i]);
+        }
+        emit OnGroupRegistered(groupPublicKey);
+
+        uint256 activationBlockHeight = block.number;
+        emit SubmitGroupPublicKeyEvent(groupPublicKey, requestID, activationBlockHeight);
     }
 
     /**
@@ -242,6 +288,7 @@ contract KeepGroupImplV1 is Ownable {
     /**
      * @dev Initialize Keep Group implementation contract with a linked Staking proxy contract.
      * @param stakingProxy Address of a staking proxy contract that will be linked to this contract.
+     * @param randomBeacon Address of a random beacon contract that will be linked to this contract.
      * @param minStake Minimum amount in KEEP that allows KEEP network client to participate in a group.
      * @param groupSize Size of a group in the threshold relay.
      * @param groupThreshold Minimum number of interacting group members needed to produce a relay entry.
@@ -251,6 +298,7 @@ contract KeepGroupImplV1 is Ownable {
      */
     function initialize(
         address stakingProxy,
+        address randomBeacon,
         uint256 minStake,
         uint256 groupThreshold,
         uint256 groupSize,
@@ -262,6 +310,7 @@ contract KeepGroupImplV1 is Ownable {
         require(stakingProxy != address(0x0), "Staking proxy address can't be zero.");
         _initialized["KeepGroupImplV1"] = true;
         _stakingProxy = stakingProxy;
+        _randomBeacon = randomBeacon;
         _minStake = minStake;
         _groupSize = groupSize;
         _groupThreshold = groupThreshold;
@@ -311,14 +360,55 @@ contract KeepGroupImplV1 is Ownable {
     }
 
     /**
+     * @dev ticketInitialSubmissionTimeout is the duration (in blocks) the
+     * staker has to submit tickets that fall under the natural threshold
+     * to satisfy the initial ticket timeout (see group selection, phase 2a).
+     */
+    function ticketInitialSubmissionTimeout() public view returns (uint256) {
+        return _timeoutInitial;
+    }
+
+    /**
+     * @dev ticketReactiveSubmissionTimeout is the duration (in blocks) the
+     * staker has to submit any tickets that did not fall under the natural
+     * threshold. This final chance to submit tickets is called reactive
+     * ticket submission (defined in the group selection algorithm, 2b).
+     */
+    function ticketReactiveSubmissionTimeout() public view returns (uint256) {
+        return _timeoutSubmission;
+    }
+
+    /**
+     * @dev ticketChallengeTimeout is the duration (in blocks) the staker
+     * has to submit any challenges for tickets that fail any checks.
+     */
+    function ticketChallengeTimeout() public view returns (uint256) {
+        return _timeoutChallenge;
+    }
+
+    /**
+     * @dev ticketSubmissionStartBlock block number at which current group
+     * selection started.
+     */
+    function ticketSubmissionStartBlock() public view returns (uint256) {
+        return _submissionStart;
+    }
+
+    /**
+     * @dev Return total number of all tokens issued.
+     */
+    function tokenSupply() public view returns (uint256) {
+        return (10**9) * (10**18);
+    }
+
+    /**
      * @dev Return natural threshold, the value N virtual stakers' tickets would be expected
      * to fall below if the tokens were optimally staked, and the tickets' values were evenly 
      * distributed in the domain of the pseudorandom function.
      */
     function naturalThreshold() public view returns (uint256) {
         uint256 space = 2**256-1; // Space consisting of all possible tickets.
-        uint256 tokens = 10**9; // Total number of all tokens issued.
-        return _groupSize.mul(space.div(tokens.div(_minStake)));
+        return _groupSize.mul(space.div(tokenSupply().div(_minStake)));
     }
 
     /**
@@ -355,4 +445,19 @@ contract KeepGroupImplV1 is Ownable {
     function version() public pure returns (string) {
         return "V1";
     }
+
+    /**
+     * @dev Cleanup data of previous group selection.
+     */
+    function cleanup() private {
+
+        for (uint i = 0; i < _tickets.length; i++) {
+            delete _proofs[_tickets[i]];
+        }
+
+        delete _tickets;
+
+        // TODO: cleanup DkgResults
+    }
+
 }

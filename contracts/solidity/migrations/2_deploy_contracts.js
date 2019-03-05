@@ -12,13 +12,13 @@ const KeepRandomBeacon = artifacts.require("./KeepRandomBeacon.sol");
 
 const withdrawalDelay = 86400; // 1 day
 const minPayment = 1;
-const minStake = 1;
+const minStake = 200000 * (10**18);
 
 const groupThreshold = 3;
 const groupSize = 5;
-const timeoutInitial = 1;
-const timeoutSubmission = 1;
-const timeoutChallenge = 1;
+const timeoutInitial = 4;
+const timeoutSubmission = 4;
+const timeoutChallenge = 4;
 
 module.exports = (deployer) => {
   deployer.then(async () => {
@@ -37,6 +37,8 @@ module.exports = (deployer) => {
     await deployer.deploy(KeepGroup, KeepGroupImplV1.address);
     await KeepRandomBeaconImplV1.at(KeepRandomBeacon.address).initialize(minPayment, withdrawalDelay);
     await KeepGroupImplV1.at(KeepGroup.address).initialize(
-      StakingProxy.address, minStake, groupThreshold, groupSize, timeoutInitial, timeoutSubmission, timeoutChallenge);
+      StakingProxy.address, KeepRandomBeacon.address, minStake, groupThreshold, groupSize, timeoutInitial, timeoutSubmission, timeoutChallenge
+    );
+    await KeepRandomBeaconImplV1.at(KeepRandomBeacon.address).setGroupContract(KeepGroup.address);
   });
 };

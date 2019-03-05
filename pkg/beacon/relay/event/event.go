@@ -15,6 +15,7 @@ type Entry struct {
 	GroupID       *big.Int
 	PreviousEntry *big.Int
 	Timestamp     time.Time
+	Seed          *big.Int
 }
 
 // Request represents a request for an entry in the threshold relay.
@@ -38,5 +39,12 @@ type GroupRegistration struct {
 
 // DKGResultPublication represents a DKG result publication event.
 type DKGResultPublication struct {
-	RequestID *big.Int
+	RequestID      *big.Int
+	GroupPublicKey []byte
+}
+
+// GroupTicketSubmission represents a group selection ticket
+// submission event.
+type GroupTicketSubmission struct {
+	TicketValue *big.Int
 }
