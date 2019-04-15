@@ -206,7 +206,7 @@ func TestLocalOnRelayEntryGenerated(t *testing.T) {
 		Value:       big.NewInt(19),
 		GroupPubKey: []byte("1"),
 		Seed:        big.NewInt(30),
-		BlockNumber: uint64(123),
+		BlockNumber: 123,
 	}
 
 	chainHandle.SubmitRelayEntry(expectedEntry)
@@ -521,14 +521,10 @@ func TestLocalOnDKGResultSubmittedUnsubscribed(t *testing.T) {
 
 func TestLocalBlockHeightWaiter(t *testing.T) {
 	var tests = map[string]struct {
-		blockHeight      int
+		blockHeight      uint64
 		initialDelay     time.Duration
 		expectedWaitTime time.Duration
 	}{
-		"does not wait for negative block height": {
-			blockHeight:      -1,
-			expectedWaitTime: 0,
-		},
 		"returns immediately for genesis block": {
 			blockHeight:      0,
 			expectedWaitTime: 0,
@@ -593,7 +589,7 @@ func TestLocalBlockHeightWaiter(t *testing.T) {
 
 func TestLocalBlockWaiter(t *testing.T) {
 	var tests = map[string]struct {
-		blockWait        int
+		blockWait        uint64
 		expectedWaitTime time.Duration
 	}{
 		"does wait for a block": {
@@ -610,10 +606,6 @@ func TestLocalBlockWaiter(t *testing.T) {
 		},
 		"does not wait for 0 blocks": {
 			blockWait:        0,
-			expectedWaitTime: 0,
-		},
-		"does not wait for negative number of blocks": {
-			blockWait:        -1,
 			expectedWaitTime: 0,
 		},
 	}
