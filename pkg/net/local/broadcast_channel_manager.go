@@ -25,9 +25,9 @@ func getBroadcastChannel(name string, staticKey *key.NetworkPublic) net.Broadcas
 		broadcastChannels = make(map[string][]*localChannel)
 	}
 
-	localChannels, exists := broadcastChannels[name]
+	_, exists := broadcastChannels[name]
 	if !exists {
-		localChannels = make([]*localChannel, 0)
+		localChannels := make([]*localChannel, 0)
 		broadcastChannels[name] = localChannels
 	}
 

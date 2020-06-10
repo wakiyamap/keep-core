@@ -225,8 +225,6 @@ func (ec *ethereumChain) SubmitRelayEntry(
 					err,
 				)
 			}
-
-			return
 		}
 	}()
 
@@ -469,8 +467,6 @@ func (ec *ethereumChain) SubmitDKGResult(
 					err,
 				)
 			}
-
-			return
 		}
 	}()
 

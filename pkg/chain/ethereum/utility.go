@@ -64,6 +64,10 @@ func (euc *ethereumUtilityChain) RequestRelayEntry() *async.EventEntryGeneratedP
 		},
 		onWatchError,
 	)
+	if err != nil {
+		promise.Fail(err)
+		return promise
+	}
 
 	_, err = euc.keepRandomBeaconServiceContract.RequestRelayEntry(payment)
 	if err != nil {
