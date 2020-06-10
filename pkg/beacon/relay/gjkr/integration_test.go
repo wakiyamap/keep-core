@@ -1228,7 +1228,6 @@ func TestExecute_InvalidMemberIndex(t *testing.T) {
 // these symmetric keys is required to test some scenarios.
 type manInTheMiddle struct {
 	senderIndex   group.MemberIndex
-	receiverIndex group.MemberIndex
 
 	seed *big.Int
 

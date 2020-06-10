@@ -16,7 +16,7 @@ import (
 	"github.com/keep-network/keep-core/pkg/net/retransmission"
 	crypto "github.com/libp2p/go-libp2p-core/crypto"
 	peer "github.com/libp2p/go-libp2p-core/peer"
-	peerstore "github.com/libp2p/go-libp2p-peerstore"
+	peerstore "github.com/libp2p/go-libp2p-core/peerstore"
 	pubsub "github.com/libp2p/go-libp2p-pubsub"
 )
 
@@ -179,7 +179,11 @@ func (c *channel) publishToPubSub(message *pb.BroadcastNetworkMessage) error {
 	c.pubsubMutex.Lock()
 	defer c.pubsubMutex.Unlock()
 
-	return c.pubsub.Publish(c.name, messageBytes)
+	topic, err := c.pubsub.Join(c.name)
+	if err != nil {
+		return err
+	}
+	return topic.Publish(context.TODO(), messageBytes)
 }
 
 func (c *channel) handleMessages(ctx context.Context) {

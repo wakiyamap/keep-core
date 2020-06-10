@@ -9,8 +9,6 @@ import (
 	"github.com/keep-network/keep-core/pkg/beacon/relay/group"
 )
 
-type dkgResultSignature = []byte
-
 // SigningMember represents a group member sharing their preferred DKG result hash
 // and signature (over this hash) with other peer members.
 type SigningMember struct {

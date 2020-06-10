@@ -195,7 +195,7 @@ func TestConcurrentPublishResult(t *testing.T) {
 					initialBlock,
 				)
 				if err != nil {
-					t.Fatal(err)
+					t.Error(err)
 				}
 
 				currentBlock, _ := blockCounter.CurrentBlock()
@@ -213,7 +213,7 @@ func TestConcurrentPublishResult(t *testing.T) {
 					initialBlock,
 				)
 				if err != nil {
-					t.Fatal(err)
+					t.Error(err)
 				}
 
 				currentBlock, _ := blockCounter.CurrentBlock()

@@ -27,7 +27,6 @@ var (
 )
 
 const (
-	bootstrapFlag     = "bootstrap"
 	portFlag          = "port"
 	portShort         = "p"
 	waitForStakeFlag  = "wait-for-stake"

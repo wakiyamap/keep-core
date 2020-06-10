@@ -24,7 +24,6 @@ import (
 	peer "github.com/libp2p/go-libp2p-core/peer"
 	dht "github.com/libp2p/go-libp2p-kad-dht"
 	dhtopts "github.com/libp2p/go-libp2p-kad-dht/opts"
-	peerstore "github.com/libp2p/go-libp2p-peerstore"
 	rhost "github.com/libp2p/go-libp2p/p2p/host/routed"
 
 	bootstrap "github.com/keep-network/go-libp2p-bootstrap"
@@ -168,7 +167,7 @@ func (cm *connectionManager) ConnectedPeers() []string {
 }
 
 func (cm *connectionManager) GetPeerPublicKey(connectedPeer string) (*key.NetworkPublic, error) {
-	peerID, err := peer.IDB58Decode(connectedPeer)
+	peerID, err := peer.Decode(connectedPeer)
 	if err != nil {
 		return nil, fmt.Errorf(
 			"failed to decode peer ID from [%s]: [%v]",
@@ -190,7 +189,7 @@ func (cm *connectionManager) GetPeerPublicKey(connectedPeer string) (*key.Networ
 }
 
 func (cm *connectionManager) DisconnectPeer(peerHash string) {
-	peerID, err := peer.IDB58Decode(peerHash)
+	peerID, err := peer.Decode(peerHash)
 	if err != nil {
 		logger.Errorf("failed to decode peer hash [%v]: [%v]", peerHash, err)
 		return
@@ -469,15 +468,15 @@ func (p *provider) bootstrap(
 	return err
 }
 
-func extractMultiAddrFromPeers(peers []string) ([]peerstore.PeerInfo, error) {
-	var peerInfos []peerstore.PeerInfo
-	for _, peer := range peers {
-		ipfsaddr, err := ma.NewMultiaddr(peer)
+func extractMultiAddrFromPeers(peers []string) ([]peer.AddrInfo, error) {
+	var peerInfos []peer.AddrInfo
+	for _, targetpeer := range peers {
+		ipfsaddr, err := ma.NewMultiaddr(targetpeer)
 		if err != nil {
 			return nil, err
 		}
 
-		peerInfo, err := peerstore.InfoFromP2pAddr(ipfsaddr)
+		peerInfo, err := peer.AddrInfoFromP2pAddr(ipfsaddr)
 		if err != nil {
 			return nil, err
 		}

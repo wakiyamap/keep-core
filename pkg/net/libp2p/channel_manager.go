@@ -8,7 +8,7 @@ import (
 	"github.com/keep-network/keep-core/pkg/net"
 	"github.com/keep-network/keep-core/pkg/net/retransmission"
 	"github.com/libp2p/go-libp2p-core/host"
-	peerstore "github.com/libp2p/go-libp2p-peerstore"
+	peerstore "github.com/libp2p/go-libp2p-core/peerstore"
 	pubsub "github.com/libp2p/go-libp2p-pubsub"
 )
 
@@ -98,7 +98,11 @@ func (cm *channelManager) getChannel(name string) (*channel, error) {
 }
 
 func (cm *channelManager) newChannel(name string) (*channel, error) {
-	sub, err := cm.pubsub.Subscribe(name)
+	topic, err := cm.pubsub.Join(name)
+	if err != nil {
+		return nil, err
+	}
+	sub, err := topic.Subscribe()
 	if err != nil {
 		return nil, err
 	}
@@ -125,7 +129,11 @@ func (cm *channelManager) newForwarder(name string, ttl time.Duration) error {
 	defer cm.forwarderSubscriptionsMutex.Unlock()
 
 	if _, ok := cm.forwarderSubscriptions[name]; !ok {
-		forwarderSubscription, err := cm.pubsub.Subscribe(name)
+		forwarderTopic, err := cm.pubsub.Join(name)
+		if err != nil {
+			return err
+		}
+		forwarderSubscription, err := forwarderTopic.Subscribe()
 		if err != nil {
 			return err
 		}

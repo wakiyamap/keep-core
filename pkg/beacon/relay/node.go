@@ -5,7 +5,6 @@ import (
 	"encoding/hex"
 	"fmt"
 	"math/big"
-	"sync"
 
 	bn256 "github.com/ethereum/go-ethereum/crypto/bn256/cloudflare"
 	"github.com/keep-network/keep-core/pkg/altbn128"
@@ -24,7 +23,6 @@ import (
 
 // Node represents the current state of a relay node.
 type Node struct {
-	mutex sync.Mutex
 
 	// Staker is an on-chain identity that this node is using to prove its
 	// stake in the system.

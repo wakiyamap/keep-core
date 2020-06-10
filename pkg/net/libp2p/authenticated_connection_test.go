@@ -139,7 +139,7 @@ func TestHandshake(t *testing.T) {
 	msg := []byte("brown fox blue tail")
 	go func(authnOutboundConn *authenticatedConnection, msg []byte) {
 		if _, err := authnOutboundConn.Write(msg); err != nil {
-			t.Fatal(err)
+			t.Error(err)
 		}
 	}(authnOutboundConn, msg)
 
