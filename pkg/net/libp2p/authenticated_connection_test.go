@@ -45,7 +45,6 @@ func TestPinnedAndMessageKeyMismatch(t *testing.T) {
 		}
 
 		maliciousInitiatorHijacksHonestRun(t, ac)
-		return
 	}(initiatorConn, initiator.peerID, initiator.privKey, responder.peerID, responder.privKey)
 
 	_, err := newAuthenticatedInboundConnection(

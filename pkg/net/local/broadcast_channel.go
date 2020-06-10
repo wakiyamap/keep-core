@@ -45,9 +45,9 @@ func (lc *localChannel) Send(ctx context.Context, message net.TaggedMarshaler) e
 		return err
 	}
 
-	unmarshaler, found := lc.unmarshalersByType[string(message.Type())]
+	unmarshaler, found := lc.unmarshalersByType[message.Type()]
 	if !found {
-		return fmt.Errorf("couldn't find unmarshaler for type %s", string(message.Type()))
+		return fmt.Errorf("couldn't find unmarshaler for type %s", message.Type())
 	}
 
 	unmarshaled := unmarshaler()

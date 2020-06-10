@@ -7,8 +7,7 @@ import (
 )
 
 func TestByteSliceToSliceOf1Byte(t *testing.T) {
-	var b []byte
-	b = make([]byte, 3, 3)
+	b := make([]byte, 3)
 	b[0] = 'a'
 	b[1] = 'b'
 	b[2] = 'c'
@@ -62,7 +61,7 @@ func TestToByte32(t *testing.T) {
 					test.nOfBytes,
 				)
 			}
-			b = make([]byte, test.nOfBytes, test.nOfBytes)
+			b = make([]byte, test.nOfBytes)
 			b[0] = 'a'
 			b[1] = 'b'
 			b[2] = 'c'

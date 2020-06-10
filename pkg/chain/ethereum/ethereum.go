@@ -208,27 +208,25 @@ func (ec *ethereumChain) SubmitRelayEntry(
 
 	go func() {
 		for {
-			select {
-			case event, success := <-generatedEntry:
-				// Channel is closed when SubmitRelayEntry failed.
-				// When this happens, event is nil.
-				if !success {
-					return
-				}
-
-				subscription.Unsubscribe()
-				close(generatedEntry)
-
-				err := relayEntryPromise.Fulfill(event)
-				if err != nil {
-					logger.Errorf(
-						"failed to fulfill promise: [%v]",
-						err,
-					)
-				}
-
+			event, success := <-generatedEntry
+			// Channel is closed when SubmitRelayEntry failed.
+			// When this happens, event is nil.
+			if !success {
 				return
 			}
+
+			subscription.Unsubscribe()
+			close(generatedEntry)
+
+			err := relayEntryPromise.Fulfill(event)
+			if err != nil {
+				logger.Errorf(
+					"failed to fulfill promise: [%v]",
+					err,
+				)
+			}
+
+			return
 		}
 	}()
 
@@ -454,27 +452,25 @@ func (ec *ethereumChain) SubmitDKGResult(
 
 	go func() {
 		for {
-			select {
-			case event, success := <-publishedResult:
-				// Channel is closed when SubmitDKGResult failed.
-				// When this happens, event is nil.
-				if !success {
-					return
-				}
-
-				subscription.Unsubscribe()
-				close(publishedResult)
-
-				err := resultPublicationPromise.Fulfill(event)
-				if err != nil {
-					logger.Errorf(
-						"failed to fulfill promise: [%v]",
-						err,
-					)
-				}
-
+			event, success := <-publishedResult
+			// Channel is closed when SubmitDKGResult failed.
+			// When this happens, event is nil.
+			if !success {
 				return
 			}
+
+			subscription.Unsubscribe()
+			close(publishedResult)
+
+			err := resultPublicationPromise.Fulfill(event)
+			if err != nil {
+				logger.Errorf(
+					"failed to fulfill promise: [%v]",
+					err,
+				)
+			}
+
+			return
 		}
 	}()
 

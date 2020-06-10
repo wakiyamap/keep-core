@@ -28,7 +28,7 @@ require (
 	github.com/mattn/go-isatty v0.0.7 // indirect
 	github.com/multiformats/go-multiaddr v0.2.0
 	github.com/pborman/uuid v1.2.0
-	github.com/pkg/errors v0.9.1 // indirect
+	github.com/pkg/errors v0.9.1
 	github.com/urfave/cli v1.22.1
 	golang.org/x/crypto v0.0.0-20200208060501-ecb85df21340
 	golang.org/x/sys v0.0.0-20200202164722-d101bd2416d5 // indirect

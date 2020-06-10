@@ -39,7 +39,7 @@ func getBroadcastChannel(name string, staticKey *key.NetworkPublic) net.Broadcas
 		messageHandlersMutex: sync.Mutex{},
 		messageHandlers:      make([]*messageHandler, 0),
 		unmarshalersMutex:    sync.Mutex{},
-		unmarshalersByType:   make(map[string]func() net.TaggedUnmarshaler, 0),
+		unmarshalersByType:   make(map[string]func() net.TaggedUnmarshaler),
 		retransmissionTicker: retransmission.NewTimeTicker(
 			context.Background(), 50*time.Millisecond,
 		),

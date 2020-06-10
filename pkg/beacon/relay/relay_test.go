@@ -25,7 +25,7 @@ func TestMonitorRelayEntryOnChain_EntrySubmitted(t *testing.T) {
 
 	relayChain := chain.ThresholdRelay()
 	chainConfig := &config.Chain{
-		RelayEntryTimeout: uint64(relayEntryTimeout),
+		RelayEntryTimeout: relayEntryTimeout,
 	}
 	startBlockHeight, err := blockCounter.CurrentBlock()
 	if err != nil {
@@ -83,7 +83,7 @@ func TestMonitorRelayEntryOnChain_EntryNotSubmitted(t *testing.T) {
 
 	relayChain := chain.ThresholdRelay()
 	chainConfig := &config.Chain{
-		RelayEntryTimeout: uint64(relayEntryTimeout),
+		RelayEntryTimeout: relayEntryTimeout,
 	}
 	startBlockHeight, err := blockCounter.CurrentBlock()
 	if err != nil {

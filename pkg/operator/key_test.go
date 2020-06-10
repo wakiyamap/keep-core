@@ -36,7 +36,7 @@ func TestUnmarshalIncorrectKey(t *testing.T) {
 		t.Fatal(err)
 	}
 	// Does not conform to the correct curve, but is a valid ecdsa and operator key
-	incorrectKey := (*PublicKey)(&privateKey.PublicKey)
+	incorrectKey := &privateKey.PublicKey
 
 	unmarshalled, err := Unmarshal(Marshal(incorrectKey))
 

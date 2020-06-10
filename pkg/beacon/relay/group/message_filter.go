@@ -91,11 +91,7 @@ func (mf *InactiveMemberFilter) FlushInactiveMembers() {
 // IsMessageFromSelf is an auxiliary function determining whether the given
 // ProtocolMessage is from the current member itself.
 func IsMessageFromSelf(memberIndex MemberIndex, message ProtocolMessage) bool {
-	if message.SenderID() == memberIndex {
-		return true
-	}
-
-	return false
+	return message.SenderID() == memberIndex
 }
 
 // IsSenderValid checks if sender of the provided ProtocolMessage is in the

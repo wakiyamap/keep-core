@@ -45,9 +45,7 @@ func convertGjkrResult(gjkrResult *gjkr.Result) *relayChain.DKGResult {
 
 		// contert sorted list of member indexes into bytes
 		bytes := make([]byte, len(sorted))
-		for i, m := range sorted {
-			bytes[i] = byte(m)
-		}
+		copy(bytes, sorted)
 
 		return bytes
 	}

@@ -96,7 +96,7 @@ func ReadEthereumConfig(filePath string) (ethereum.Config, error) {
 // capturing the password.
 func readPassword(prompt string) (string, error) {
 	fmt.Print(prompt)
-	bytePassword, err := terminal.ReadPassword(int(syscall.Stdin))
+	bytePassword, err := terminal.ReadPassword(syscall.Stdin)
 	if err != nil {
 		return "", fmt.Errorf("Unable to read password, error [%s]", err)
 	}

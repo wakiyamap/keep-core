@@ -74,7 +74,7 @@ func Marshal(publicKey *NetworkPublic) []byte {
 func Libp2pKeyToNetworkKey(publicKey libp2pcrypto.PubKey) *NetworkPublic {
 	switch networkKey := publicKey.(type) {
 	case *libp2pcrypto.Secp256k1PublicKey:
-		return (*NetworkPublic)(networkKey)
+		return networkKey
 	}
 	return nil
 }

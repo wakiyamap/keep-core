@@ -20,7 +20,7 @@ type watcher struct {
 	channel chan uint64
 }
 
-var blockTime = time.Duration(500 * time.Millisecond)
+var blockTime = 500 * time.Millisecond
 
 func (lbc *localBlockCounter) WaitForBlockHeight(blockNumber uint64) error {
 	waiter, err := lbc.BlockHeightWaiter(blockNumber)

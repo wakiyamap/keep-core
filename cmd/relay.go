@@ -78,10 +78,7 @@ func relayRequest(c *cli.Context) error {
 			wait <- struct{}{}
 		})
 
-	select {
-	case <-wait:
-		return nil
-	}
+	return nil
 }
 
 // genesis kicks off protocol to create the first group.

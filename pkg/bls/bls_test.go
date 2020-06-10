@@ -107,7 +107,7 @@ func TestThresholdBLS(t *testing.T) {
 	//
 	// NOTE: The loop begins from 1, not 0, as shares must be 1-indexed.
 	for i := 1; i <= numOfPlayers; i++ {
-		secretKeyShare := GetSecretKeyShare(masterSecretKey, int(i))
+		secretKeyShare := GetSecretKeyShare(masterSecretKey, i)
 		publicKeyShares = append(publicKeyShares, secretKeyShare.PublicKeyShare())
 		signatureShare := SignG1(secretKeyShare.V, message)
 		signatureShares = append(signatureShares, &SignatureShare{

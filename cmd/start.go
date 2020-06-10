@@ -150,14 +150,7 @@ func Start(c *cli.Context) error {
 		return fmt.Errorf("error initializing beacon: [%v]", err)
 	}
 
-	select {
-	case <-ctx.Done():
-		if err != nil {
-			return err
-		}
-
-		return fmt.Errorf("uh-oh, we went boom boom for no reason")
-	}
+	return fmt.Errorf("uh-oh, we went boom boom for no reason")
 }
 
 func loadStaticKey(

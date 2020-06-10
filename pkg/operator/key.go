@@ -26,14 +26,14 @@ func GenerateKeyPair() (*PrivateKey, *PublicKey, error) {
 		return nil, nil, err
 	}
 
-	return (*PrivateKey)(ecdsaKey), (*PublicKey)(&ecdsaKey.PublicKey), nil
+	return ecdsaKey, &ecdsaKey.PublicKey, nil
 }
 
 // EthereumKeyToOperatorKey transforms a `go-ethereum`-based ECDSA key into the
 // format supported by all packages used in keep-core.
 func EthereumKeyToOperatorKey(ethereumKey *keystore.Key) (*PrivateKey, *PublicKey) {
 	privKey := ethereumKey.PrivateKey
-	return (*PrivateKey)(privKey), (*PublicKey)(&privKey.PublicKey)
+	return privKey, &privKey.PublicKey
 }
 
 // Marshal takes an operator's PublicKey and produces an uncompressed public key
@@ -52,5 +52,5 @@ func Unmarshal(data []byte) (*PublicKey, error) {
 		)
 	}
 	ecdsaPublicKey := &ecdsa.PublicKey{Curve: crypto.S256(), X: x, Y: y}
-	return (*PublicKey)(ecdsaPublicKey), nil
+	return ecdsaPublicKey, nil
 }

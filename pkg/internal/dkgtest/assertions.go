@@ -120,7 +120,7 @@ func AssertMisbehavingMembers(
 	)
 
 	for _, misbehaved := range testResult.dkgResult.Misbehaved {
-		memberIndex := group.MemberIndex(uint8(misbehaved))
+		memberIndex := misbehaved
 		actualMisbehavingMembers = append(actualMisbehavingMembers, memberIndex)
 
 		misbehaviourExpected := containsMemberIndex(
